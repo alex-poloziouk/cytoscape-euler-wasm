@@ -1,6 +1,7 @@
 # cytoscape-euler-wasm
 
 [![Deploy](https://github.com/alex-poloziouk/cytoscape-euler-wasm/actions/workflows/deploy.yml/badge.svg)](https://github.com/alex-poloziouk/cytoscape-euler-wasm/actions/workflows/deploy.yml)
+[![npm](https://img.shields.io/npm/v/cytoscape-euler-wasm)](https://www.npmjs.com/package/cytoscape-euler-wasm)
 
 High-performance WebAssembly port of the [cytoscape.js-euler](https://github.com/cytoscape/cytoscape.js-euler) force-directed graph layout algorithm.
 

@@ -1,0 +1,58 @@
+{
+  "name": "cytoscape-euler-wasm",
+  "version": "1.0.0",
+  "description": "High-performance WASM port of cytoscape-euler force-directed layout with Web Worker execution, optional multi-threading, progress callbacks, and telemetry",
+  "main": "dist/cytoscape-euler-wasm.umd.js",
+  "module": "src/index.js",
+  "unpkg": "dist/cytoscape-euler-wasm.umd.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "default": "./dist/cytoscape-euler-wasm.umd.js"
+    }
+  },
+  "files": [
+    "src/",
+    "dist/",
+    "types/",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "start": "echo '\n  Demo: http://localhost:8080/demo/\n' && ws -p 8080 --hostname localhost --cors.opener-policy same-origin --cors.embedder-policy require-corp",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "cytoscape",
+    "cytoscape-extension",
+    "layout",
+    "force-directed",
+    "euler",
+    "wasm",
+    "webassembly",
+    "web-worker",
+    "multi-threaded",
+    "graph",
+    "network",
+    "visualization"
+  ],
+  "peerDependencies": {
+    "cytoscape": "^3.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.2",
+    "local-web-server": "^5.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alex-poloziouk/cytoscape-euler-wasm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alex-poloziouk/cytoscape-euler-wasm/issues"
+  },
+  "homepage": "https://github.com/alex-poloziouk/cytoscape-euler-wasm#readme",
+  "author": "alex.poloziouk",
+  "license": "MIT"
+}

@@ -1,0 +1,39 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write  # Required for npm provenance (SLSA attestation via Sigstore)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          test -f dist/cytoscape-euler-wasm.umd.js || (echo "Missing UMD bundle" && exit 1)
+          test -f dist/euler-worker.umd.js || (echo "Missing worker bundle" && exit 1)
+          test -f dist/wasm/euler_wasm_bg.wasm || (echo "Missing standard WASM binary" && exit 1)
+          test -f dist/wasm-threaded/euler_wasm_bg.wasm || (echo "Missing threaded WASM binary" && exit 1)
+          echo "All build outputs present"
+
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

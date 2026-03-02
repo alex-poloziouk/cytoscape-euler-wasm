@@ -1,0 +1,327 @@
+/* cytoscape-euler-wasm demo styles — light theme */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+.header h1 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c0392b;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #888;
+}
+
+/* ── Progress Bar (centered overlay on the canvas) ──────────────── */
+
+.progress-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.progress-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.progress-bar {
+  position: relative;
+  width: 260px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c0392b, #e74c3c);
+  width: 0%;
+  transition: width 0.15s ease-out;
+  border-radius: 4px;
+}
+
+.progress-fill.js {
+  background: linear-gradient(90deg, #6c3483, #8e44ad);
+}
+
+.progress-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c0392b;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-text.js {
+  color: #6c3483;
+}
+
+/* ── Cytoscape Canvas ───────────────────────────────────────────── */
+
+.cy-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+#cy {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+
+/* ── Controls ───────────────────────────────────────────────────── */
+
+.controls {
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fafafa;
+  border-top: 1px solid #ddd;
+  flex-shrink: 0;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.control-group {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  background: #fff;
+}
+
+.control-group.graph-group {
+  flex: 5;
+}
+
+.control-group.layout-group {
+  flex: 12;
+}
+
+.control-group.run-group {
+  flex: 3;
+}
+
+.control-group legend {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c0392b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0 6px;
+}
+
+.control-group label {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+}
+
+.control-group input[type="number"] {
+  width: 72px;
+  padding: 4px 6px;
+  font-size: 12px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #333;
+  text-align: center;
+}
+
+.control-group input.narrow-input {
+  width: 50px;
+}
+
+.control-group input[type="number"]:focus {
+  outline: none;
+  border-color: #c0392b;
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+.control-group span {
+  color: #888;
+  font-size: 12px;
+}
+
+.thread-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hint {
+  font-size: 10px;
+  color: #999;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+
+.btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #3498db;
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.btn-wasm {
+  background: #c0392b;
+  color: #fff;
+}
+.btn-wasm:hover:not(:disabled) {
+  background: #e74c3c;
+}
+
+.btn-js {
+  background: #6c3483;
+  color: #fff;
+}
+.btn-js:hover:not(:disabled) {
+  background: #8e44ad;
+}
+
+.btn-compare {
+  background: #27ae60;
+  color: #fff;
+  font-weight: 700;
+}
+.btn-compare:hover:not(:disabled) {
+  background: #2ecc71;
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ── Results ────────────────────────────────────────────────────── */
+
+.results {
+  display: flex;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-engine {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 52px;
+}
+
+#result-wasm .result-engine { color: #c0392b; }
+#result-js .result-engine { color: #6c3483; }
+
+.result-value {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #222;
+}
+
+.result-detail {
+  font-size: 11px;
+  color: #888;
+}
+
+.speedup .result-engine {
+  color: #27ae60 !important;
+}
+
+.speedup-good { color: #27ae60 !important; }
+.speedup-ok { color: #d4a017 !important; }
+.speedup-bad { color: #c0392b !important; }
+
+.result-placeholder {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}
+
+/* ── Utility ────────────────────────────────────────────────────── */
+
+.hidden {
+  display: none !important;
+}

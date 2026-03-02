@@ -1,0 +1,103 @@
+[package]
+name = "euler-wasm"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alex Poloziouk"]
+description = "WASM implementation of Euler force-directed layout with Barnes-Hut O(n log n) and optional multi-threading"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+# ============================================================================
+# BUILD PROFILES
+# ============================================================================
+# 
+# QUICK BUILD COMMANDS:
+# ---------------------
+# 1. Standard WASM (fastest to build, good compatibility):
+#    wasm-pack build --target web --release
+#
+# 2. Threaded WASM (requires nightly + SharedArrayBuffer):
+#    RUSTFLAGS='-C target-feature=+atomics,+bulk-memory -Clink-arg=--shared-memory' \
+#    rustup run nightly wasm-pack build --target web --release --features parallel \
+#    -- -Z build-std=panic_abort,std
+#
+# 3. Native tests (for benchmarking):
+#    cargo test --target x86_64-unknown-linux-gnu --release -- --nocapture
+#
+# 4. Native tests with parallel:
+#    cargo test --target x86_64-unknown-linux-gnu --release --features parallel
+#
+# OPTIMIZATION FLAGS EXPLAINED:
+# ----------------------------
+# opt-level = 3      : Maximum optimization (SIMD, loop unrolling, inlining)
+# lto = "fat"        : Full link-time optimization across all crates
+# codegen-units = 1  : Single codegen unit for better optimization
+# panic = "abort"    : No unwinding = smaller binary, faster execution
+# strip = true       : Remove debug symbols (smaller binary)
+# ============================================================================
+
+[package.metadata.wasm-pack.profile.release]
+# wasm-opt can sometimes break atomics/threading, disable for threaded builds
+# For standard builds, you can enable: wasm-opt = ["-O4", "--enable-simd"]
+wasm-opt = false
+
+[features]
+default = ["console_error_panic_hook"]
+# Enable parallel feature for multithreaded WASM via Rayon
+# Requires: nightly Rust, rust-src component, COOP/COEP headers
+parallel = ["rayon", "wasm-bindgen-rayon"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+console_error_panic_hook = { version = "0.1", optional = true }
+# Multithreading support (requires SharedArrayBuffer + COOP/COEP headers)
+wasm-bindgen-rayon = { version = "1.2", optional = true }
+rayon = { version = "1.10", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+# WASM-compatible timing (uses performance.now in browser)
+instant = { version = "0.1", features = ["wasm-bindgen"] }
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+    "console",
+    "Performance",
+    "Window",
+]
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+# ============================================================================
+# RELEASE PROFILE - Maximum Performance
+# ============================================================================
+[profile.release]
+opt-level = 3        # Max optimization (includes auto-vectorization)
+lto = "fat"          # Full LTO - best optimization, slower compile
+codegen-units = 1    # Single codegen unit for maximum optimization
+panic = "abort"      # Smaller binary, no unwinding overhead
+strip = true         # Strip debug symbols
+
+# Optimize all dependencies the same way
+[profile.release.package."*"]
+opt-level = 3
+
+# ============================================================================
+# ALTERNATIVE PROFILES (uncomment to use)
+# ============================================================================
+
+# Fast compile, good performance (use with --profile dev-optimized)
+# [profile.dev-optimized]
+# inherits = "dev"
+# opt-level = 2
+# debug = false
+
+# Smaller binary, slightly slower (use with --profile release-small)
+# [profile.release-small]
+# inherits = "release"
+# opt-level = "s"      # Optimize for size
+# lto = true
+# strip = true

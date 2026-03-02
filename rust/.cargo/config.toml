@@ -1,0 +1,9 @@
+[build]
+target = "wasm32-unknown-unknown"
+
+[target.wasm32-unknown-unknown]
+rustflags = ["-C", "target-feature=+simd128"]
+
+# Threading support (disabled for initial build - requires nightly + build-std)
+# [unstable]
+# build-std = ["panic_abort", "std"]

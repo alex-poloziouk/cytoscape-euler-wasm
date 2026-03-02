@@ -1,0 +1,210 @@
+# =============================================================================
+# Deploy Demo to GitHub Pages
+# =============================================================================
+#
+# This workflow builds the Rust WASM modules from source and deploys the
+# interactive demo to GitHub Pages.
+#
+# Pipeline stages:
+#   1. test  — cargo test (46 pass, 2 ignored benchmarks)
+#   2. build — wasm-pack standard + threaded builds via build-all.sh
+#   3. site  — assemble demo/ + dist/ into flat _site/ structure
+#   4. deploy — upload to GitHub Pages
+#
+# Rust toolchain requirements:
+#   - Nightly (required for threaded build's -Z build-std flag)
+#   - wasm32-unknown-unknown target
+#   - rust-src component (needed for build-std to rebuild std for WASM)
+#
+# Build outputs (from rust/build-all.sh → dist/):
+#   dist/wasm/               — Single-threaded WASM (~89K .wasm)
+#   dist/wasm-threaded/      — Multi-threaded WASM (~160K .wasm, Rayon)
+#
+# Path remapping for Pages:
+#   In the repo, demo/ files reference ../dist/ (one level up).
+#   For Pages, everything is flattened to root, so ../dist/ → ./dist/.
+# =============================================================================
+
+name: Deploy Demo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Allow manual trigger from GitHub UI (Actions → Run workflow)
+  workflow_dispatch:
+
+# Permissions needed for GitHub Pages deployment via Actions
+permissions:
+  contents: read    # Read repo contents
+  pages: write      # Write to Pages environment
+  id-token: write   # OIDC token for Pages deployment auth
+
+# Cancel any in-flight deployment when a new push arrives
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # ===========================================================================
+  # TEST — Run Rust unit tests before building
+  # ===========================================================================
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install Rust nightly with the wasm32 target.
+      # Nightly is required because the threaded build uses -Z build-std,
+      # and we use nightly for consistency across test + build stages.
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+          components: rust-src
+
+      # Cache Cargo registry + build artifacts to speed up repeat runs.
+      # Key includes Cargo.lock hash so cache invalidates on dep changes.
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: cargo-test-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: cargo-test-
+
+      # Run the test suite as a native binary (not WASM).
+      # The rust/.cargo/config.toml sets default target to wasm32-unknown-unknown,
+      # so we must explicitly override with --target to get a runnable binary.
+      # 46 tests pass; 2 benchmarks are #[ignore]d and skipped here.
+      - name: Run tests
+        working-directory: rust
+        run: cargo test --target x86_64-unknown-linux-gnu
+
+  # ===========================================================================
+  # BUILD + DEPLOY — Compile WASM from Rust source, assemble site, deploy
+  # ===========================================================================
+  deploy:
+    needs: test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # Install Rust nightly with wasm32 target + rust-src.
+      # rust-src is needed for `-Z build-std=panic_abort,std` which rebuilds
+      # the standard library for WASM with threading support (atomics,
+      # shared-memory, bulk-memory).
+      - name: Install Rust nightly
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+          components: rust-src
+
+      # Install wasm-pack — the high-level tool that drives wasm-bindgen
+      # and produces the JS/WASM output pair.
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      # Cache Cargo registry, git checkouts, and the build target directory.
+      # This dramatically speeds up repeat builds (~3 min → ~30s).
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: cargo-build-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: cargo-build-
+
+      # Run build-all.sh, which produces two WASM builds:
+      #
+      # 1. Standard (single-threaded + SIMD):
+      #    wasm-pack build --target web --release → dist/wasm/
+      #    RUSTFLAGS: +simd128
+      #
+      # 2. Threaded (multi-threaded + SIMD):
+      #    wasm-pack build --target web --release (nightly, -Z build-std) → dist/wasm-threaded/
+      #    RUSTFLAGS: +simd128, +atomics, +bulk-memory, --shared-memory,
+      #    --import-memory, --max-memory=256MB, TLS exports
+      #
+      # Output files per build: euler_wasm.js (~20K) + euler_wasm_bg.wasm (~89-160K)
+      # Threaded build also copies snippets/workerHelpers.js (Rayon thread bootstrap)
+      - name: Build WASM
+        working-directory: rust
+        run: |
+          chmod +x build-all.sh
+          ./build-all.sh
+
+      # Install Node.js and build the JS bundles (UMD layout + worker).
+      # The demo uses dist/euler-worker.umd.js, which is produced by esbuild.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build JS bundles
+        run: npm run build
+
+      # Assemble the _site/ directory for GitHub Pages deployment.
+      #
+      # Repo structure:              Pages structure (_site/):
+      #   demo/index.html              index.html
+      #   demo/demo.js                 demo.js
+      #   demo/demo.css                demo.css
+      #   src/*.js                     src/*.js
+      #   dist/wasm/                   dist/wasm/
+      #   dist/wasm-threaded/          dist/wasm-threaded/
+      #   dist/euler-worker.umd.js    dist/euler-worker.umd.js
+      #
+      # Path fix: demo/ files use '../dist/' and '../src/' to reach artifacts one
+      # level up. In the flat Pages structure, everything is at root, so we
+      # rewrite '../dist/' → './dist/' and '../src/' → './src/'.
+      - name: Assemble site
+        run: |
+          mkdir -p _site/dist _site/src
+
+          # Copy demo files to site root (flattened — no demo/ prefix)
+          cp demo/index.html _site/
+          cp demo/demo.js _site/
+          cp demo/demo.css _site/
+
+          # Copy package source (needed by demo ESM imports)
+          cp src/*.js _site/src/
+
+          # Copy freshly-built WASM artifacts + worker bundle
+          cp -r dist/wasm _site/dist/
+          cp -r dist/wasm-threaded _site/dist/
+          cp dist/euler-worker.umd.js _site/dist/
+
+          # Fix relative paths for flat Pages structure:
+          # In the repo: demo/demo.js does `import('../src/...')` and '../dist/...'
+          # On Pages:    demo.js is at root, so it needs './src/...' and './dist/...'
+          sed -i 's|\.\./dist/|./dist/|g' _site/demo.js
+          sed -i 's|\.\./src/|./src/|g' _site/demo.js
+
+          echo "=== Site structure ==="
+          find _site -type f | head -30
+          echo "=== WASM file sizes ==="
+          ls -lh _site/dist/wasm/euler_wasm_bg.wasm _site/dist/wasm-threaded/euler_wasm_bg.wasm
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

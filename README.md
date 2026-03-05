@@ -7,7 +7,9 @@ High-performance WebAssembly port of the [cytoscape.js-euler](https://github.com
 
 **5–10x faster** than the JavaScript implementation, depending on graph size and core count.
 
-[**▶ Live Demo**](https://alex-poloziouk.github.io/cytoscape-euler-wasm/)
+[**▶ Live Demo**](https://alex-poloziouk.github.io/cytoscape-euler-wasm/) · [**Angular Example**](examples/angular/) (multi-threaded)
+
+> The live demo runs **single-threaded** — GitHub Pages does not serve the `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy` headers required for `SharedArrayBuffer`, so multi-threading is unavailable. The [Angular example](examples/angular/) self-hosts the WASM files with the correct headers, enabling full multi-threaded performance.
 
 ## What Is This?
 
@@ -458,6 +460,8 @@ cytoscape-euler-wasm/
 │   ├── index.html
 │   ├── demo.js
 │   └── demo.css
+├── examples/
+│   └── angular/             # Angular 21+ demo with multi-threading
 ├── esbuild.config.mjs       # Build config (UMD bundles)
 ├── .github/workflows/
 │   ├── deploy.yml            # CI: build WASM + deploy to Pages

@@ -1,0 +1,255 @@
+/* Viewport Container */
+.viewport-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+#cy {
+  width: 100%;
+  height: 100%;
+}
+
+#cy:focus {
+  outline: 3px solid #0074d9;
+  outline-offset: -3px;
+}
+
+/* Menu Overlay */
+.menu-overlay {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timer {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #666;
+  font-family: monospace;
+}
+
+.telemetry {
+  margin-top: 2px;
+  font-size: 10px;
+  color: #888;
+  font-family: monospace;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #0074d9;
+  transition: width 0.15s ease-out;
+}
+
+.progress-bar-text {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: #0074d9;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+/* Graph Builder Panel */
+.test-data-panel {
+  position: absolute;
+  top: 70px;
+  left: 5px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  min-width: 240px;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+.test-data-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f0f0f0;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.test-data-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #666;
+  padding: 0 2px;
+}
+
+.test-data-close:hover {
+  color: #333;
+}
+
+.test-data-content {
+  padding: 8px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+.test-data-section {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 12px;
+}
+
+.test-data-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.test-data-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 4px 0;
+  user-select: none;
+  font-size: 12px;
+}
+
+.test-data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 0;
+  padding: 2px 0;
+}
+
+.test-data-row label {
+  font-size: 11px;
+  color: #333;
+}
+
+.test-data-row.disabled {
+  opacity: 0.5;
+}
+
+.test-data-row .hint {
+  font-size: 9px;
+  color: #888;
+  font-style: italic;
+}
+
+.test-data-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.test-data-input-group button {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-data-input-group button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.test-data-input-group button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.test-data-input-group button:hover {
+  background: #e0e0e0;
+}
+
+.test-data-input-group input {
+  width: 70px;
+  height: 22px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-right: none;
+  font-size: 11px;
+}
+
+.test-data-input-group input:focus {
+  outline: none;
+  border-color: #0074d9;
+}
+
+.generate-btn {
+  padding: 6px 16px;
+  background: #0074d9;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.generate-btn:hover {
+  background: #005fa3;
+}
+
+.secondary-btn {
+  padding: 6px 12px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  margin-right: 8px;
+}
+
+.secondary-btn:hover {
+  background: #5a6268;
+}
+
+.test-data-actions {
+  margin-top: 12px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.checkbox-row {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-row input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

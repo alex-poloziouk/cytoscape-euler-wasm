@@ -1,0 +1,172 @@
+<div class="viewport-container">
+  <div id="cy"></div>
+  <div class="menu-overlay">
+    <button (click)="settings.togglePanel()">Graph Builder</button>
+    @if (layoutTime()) {
+      <div class="timer">{{ layoutTime() }}</div>
+    }
+    @if (telemetryInfo()) {
+      <div class="telemetry">{{ telemetryInfo() }}</div>
+    }
+  </div>
+
+  <!-- Progress bar during WASM computation -->
+  @if (progressPercent() !== null) {
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" [style.width.%]="progressPercent()"></div>
+      <span class="progress-bar-text">{{ progressPercent() }}%</span>
+    </div>
+  }
+
+  <!-- Graph Builder Panel -->
+  @if (settings.showPanel()) {
+  <div class="test-data-panel">
+    <div class="test-data-header">
+      <span>Graph Builder</span>
+      <button class="test-data-close" (click)="settings.togglePanel()">×</button>
+    </div>
+    <div class="test-data-content">
+      <!-- Tree Generation Section -->
+      <details open class="test-data-section">
+        <summary>Tree Generation</summary>
+        <div class="test-data-row">
+          <label>Minimum Nodes</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateMinNodes(-5)">−</button>
+            <input type="number" [value]="settings.minNodes()"
+                   (change)="settings.setMinNodes(+$any($event.target).value)" min="1" />
+            <button (click)="settings.updateMinNodes(5)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Maximum Nodes</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateMaxNodes(-5)">−</button>
+            <input type="number" [value]="settings.maxNodes()"
+                   (change)="settings.setMaxNodes(+$any($event.target).value)" min="1" />
+            <button (click)="settings.updateMaxNodes(5)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Minimum Children</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateMinChildren(-1)">−</button>
+            <input type="number" [value]="settings.minChildren()"
+                   (change)="settings.setMinChildren(+$any($event.target).value)" min="1" />
+            <button (click)="settings.updateMinChildren(1)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Maximum Children</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateMaxChildren(-1)">−</button>
+            <input type="number" [value]="settings.maxChildren()"
+                   (change)="settings.setMaxChildren(+$any($event.target).value)" min="1" />
+            <button (click)="settings.updateMaxChildren(1)">+</button>
+          </div>
+        </div>
+        <div class="test-data-actions">
+          <button class="generate-btn" (click)="onGenerateTree()">Generate Tree</button>
+        </div>
+      </details>
+
+      <!-- Euler Layout Settings -->
+      <details open class="test-data-section">
+        <summary>Euler Layout Settings</summary>
+        <div class="test-data-row">
+          <label>Spring Length</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('springLength', -10)">−</button>
+            <input type="number" [value]="settings.eulerSpringLength()"
+                   (change)="settings.setEulerSpringLength(+$any($event.target).value)" min="10" />
+            <button (click)="settings.updateEuler('springLength', 10)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Gravity</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('gravity', -0.5)">−</button>
+            <input type="number" [value]="settings.eulerGravity()" step="0.1"
+                   (change)="settings.setEulerGravity(+$any($event.target).value)" />
+            <button (click)="settings.updateEuler('gravity', 0.5)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Mass</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('mass', -10)">−</button>
+            <input type="number" [value]="settings.eulerMass()"
+                   (change)="settings.setEulerMass(+$any($event.target).value)" min="1" />
+            <button (click)="settings.updateEuler('mass', 10)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Spring Coeff</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('springCoeff', -0.0001)">−</button>
+            <input type="number" [value]="settings.eulerSpringCoeff()" step="0.0001"
+                   (change)="settings.setEulerSpringCoeff(+$any($event.target).value)" min="0.0001" />
+            <button (click)="settings.updateEuler('springCoeff', 0.0001)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Drag Coeff</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('dragCoeff', -0.05)">−</button>
+            <input type="number" [value]="settings.eulerDragCoeff()" step="0.05"
+                   (change)="settings.setEulerDragCoeff(+$any($event.target).value)" min="0" />
+            <button (click)="settings.updateEuler('dragCoeff', 0.05)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Movement Threshold</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('movementThreshold', -0.5)">−</button>
+            <input type="number" [value]="settings.eulerMovementThreshold()" step="0.1"
+                   (change)="settings.setEulerMovementThreshold(+$any($event.target).value)" min="0.01" />
+            <button (click)="settings.updateEuler('movementThreshold', 0.5)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Max Iterations</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('maxIterations', -50)">−</button>
+            <input type="number" [value]="settings.eulerMaxIterations()"
+                   (change)="settings.setEulerMaxIterations(+$any($event.target).value)" min="50" />
+            <button (click)="settings.updateEuler('maxIterations', 50)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row">
+          <label>Max Sim Time (ms)</label>
+          <div class="test-data-input-group">
+            <button (click)="settings.updateEuler('maxSimulationTime', -1000)">−</button>
+            <input type="number" [value]="settings.eulerMaxSimulationTime()"
+                   (change)="settings.setEulerMaxSimulationTime(+$any($event.target).value)" min="1000" />
+            <button (click)="settings.updateEuler('maxSimulationTime', 1000)">+</button>
+          </div>
+        </div>
+        <div class="test-data-row checkbox-row" [class.disabled]="useWasmLayout()">
+          <label>Animate @if (useWasmLayout()) { <span class="hint">(JS only)</span> }</label>
+          <input type="checkbox" [checked]="settings.eulerAnimate()"
+                 [disabled]="useWasmLayout()"
+                 (change)="settings.eulerAnimate.set($any($event.target).checked)" />
+        </div>
+        <div class="test-data-row checkbox-row">
+          <label>Randomize</label>
+          <input type="checkbox" [checked]="settings.eulerRandomize()"
+                 (change)="settings.eulerRandomize.set($any($event.target).checked)" />
+        </div>
+        <div class="test-data-row checkbox-row">
+          <label>Use WASM</label>
+          <input type="checkbox" [checked]="useWasmLayout()"
+                 (change)="toggleWasmLayout()" />
+        </div>
+        <div class="test-data-actions">
+          <button class="secondary-btn" (click)="settings.resetAllDefaults()">Reset Defaults</button>
+          <button class="generate-btn" (click)="rerunLayout()">Re-run Layout</button>
+        </div>
+      </details>
+    </div>
+  </div>
+  }
+</div>

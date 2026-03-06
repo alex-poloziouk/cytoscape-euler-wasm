@@ -180,6 +180,7 @@ jobs:
           cp demo/index.html _site/
           cp demo/demo.js _site/
           cp demo/demo.css _site/
+          cp demo/coi-serviceworker.js _site/
 
           # Copy package source (needed by demo ESM imports)
           cp src/*.js _site/src/

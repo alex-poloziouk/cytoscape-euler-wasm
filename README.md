@@ -9,7 +9,7 @@ High-performance WebAssembly port of the [cytoscape.js-euler](https://github.com
 
 [**▶ Live Demo**](https://alex-poloziouk.github.io/cytoscape-euler-wasm/) · [**Angular Example**](examples/angular/) (multi-threaded)
 
-> The live demo runs **single-threaded** — GitHub Pages does not serve the `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy` headers required for `SharedArrayBuffer`, so multi-threading is unavailable. The [Angular example](examples/angular/) self-hosts the WASM files with the correct headers, enabling full multi-threaded performance.
+> The live demo uses [coi-serviceworker](https://github.com/gzuidhof/coi-serviceworker) to inject `Cross-Origin-Opener-Policy` / `Cross-Origin-Embedder-Policy` headers via a Service Worker, enabling `SharedArrayBuffer` and multi-threading on GitHub Pages. The first page load registers the worker and reloads automatically.
 
 ## What Is This?
 
